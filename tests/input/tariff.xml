@@ -1,0 +1,122 @@
+<!-- Dynamic Capacitated -->
+
+<simulation>
+  <control>
+    <duration>4</duration>
+    <startmonth>1</startmonth>
+    <startyear>2000</startyear>
+  </control>
+
+  <archetypes>
+    <spec><lib>agents</lib><name>Sink</name></spec>
+    <spec><lib>agents</lib><name>Source</name></spec>
+    <spec><lib>agents</lib><name>NullInst</name></spec>
+    <spec><lib>agents</lib><name>NullRegion</name></spec>
+    <spec><lib>cycamore</lib><name>TariffRegion</name></spec>
+  </archetypes>
+
+  <facility>
+    <name>SourceA</name>
+    <config>
+      <Source>
+        <commod>A</commod>
+        <recipe_name>commod_recipe</recipe_name>
+        <capacity>1.0</capacity>
+      </Source>
+    </config>
+  </facility>
+
+  <facility>
+    <name>SourceB</name>
+    <config>
+      <Source>
+        <commod>B</commod>
+        <recipe_name>commod_recipe</recipe_name>
+        <capacity>1.0</capacity>
+      </Source>
+    </config>
+  </facility>
+
+  <facility>
+    <name>Sink</name>
+    <config>
+      <Sink>
+        <in_commods>
+          <val>A</val>
+          <val>B</val>
+        </in_commods>
+        <capacity>1.0</capacity>
+      </Sink>
+    </config>
+  </facility>
+
+  <region>
+    <name>RegionA</name>
+    <config> 
+      <TariffRegion>
+        <!--Prefer RegionB for t=0, then less preference for t=1, more for t=2, none for t=3-->
+        <tariff_vals>
+          <key>0</key>
+          <val>
+            <key>RegionB</key>
+            <val>2</val>
+          </val>
+          <key>1</key>
+          <val>
+            <key>RegionB</key>
+            <val>0.5</val>
+          </val>
+          <key>2</key>
+          <val>
+            <key>RegionB</key>
+            <val>2</val>
+          </val>
+          <key>3</key>
+          <val>
+            <key>RegionB</key>
+            <val>-1</val>
+          </val>
+        </tariff_vals>
+      </TariffRegion> 
+    </config>
+    <institution>
+      <name>InstitutionA</name>
+      <config> <NullInst/> </config>
+      <initialfacilitylist>
+        <entry>
+          <prototype>SourceA</prototype>
+          <number>1</number>
+        </entry>
+        <entry>
+          <prototype>Sink</prototype>
+          <number>1</number>
+        </entry>
+      </initialfacilitylist>
+    </institution>
+  </region>
+  
+  <region>
+    <name>RegionB</name>
+    <config> <NullRegion/> </config>
+    <institution>
+      <name>InstitutionB</name>
+      <initialfacilitylist>
+        <entry>
+          <prototype>SourceB</prototype>
+          <number>1</number>
+        </entry>
+      </initialfacilitylist>
+      <config> <NullInst/> </config>
+    </institution>
+  </region>
+
+  <recipe>
+    <name>commod_recipe</name>
+    <basis>mass</basis>
+    <nuclide>
+      <id>010010000</id>
+      <comp>1</comp>
+    </nuclide>
+  </recipe>
+
+</simulation>
