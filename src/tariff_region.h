@@ -12,8 +12,18 @@ class TariffRegion : public cyclus::Region {
   TariffRegion(cyclus::Context* ctx);
   virtual ~TariffRegion();
 
-  #pragma cyclus
+  /// #pragma cyclus
 
+  #pragma cyclus clone
+  #pragma cyclus initfromcopy
+  #pragma cyclus initfromdb
+  #pragma cyclus infiletodb
+  #pragma cyclus schema
+  #pragma cyclus annotations
+  #pragma cyclus snapshot
+  #pragma cyclus snapshotinv
+  #pragma cyclus initinv
+  
   #pragma cyclus note {"doc": "A region that applies tarrifs to trades with " \
                               "other regions."}
 
