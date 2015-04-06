@@ -26,7 +26,7 @@ class TestRegression(TestCase):
         self.ext = '.sqlite'
         self.outf = str(uuid.uuid4()) + self.ext
         self.inf = None
-
+        
     def __del__(self):
         if os.path.isfile(self.outf):
             print("removing {0}".format(self.outf))
@@ -36,6 +36,8 @@ class TestRegression(TestCase):
         if not self.inf:
             raise TypeError(("self.inf must be set in derived classes "
                              "to run regression tests."))
+        self.ext = 'h5' if self.ext is None else self.ext
+        self.outf += '.' + self.ext
         run_cyclus("cyclus", os.getcwd(), self.inf, self.outf)        
 
         # Get specific tables and columns
@@ -476,3 +478,56 @@ class TestRecycle(TestRegression):
         exp[549] = 420.42772559790944
         self.do_compare('reactor', 'repo', 942390000, exp)
 
+class TestTariff(TestRegression):
+    """Tests TariffRegion over a 4-time step simulation.
+
+    RegionA is comprised of a Source and Sink. RegionB is a TariffRegion, and is
+    comprised of a Source. All facilties have a per-timestep capacity of unity.  
+
+    RegionB imposes an "incentive" tariff at t_0, i.e., interregional trade is
+    preferred. At t_1, a normal tariff is applied, making intraregional trade
+    preferred. The incentive is again applied at t_1. Finally cutoff tariff
+    (i.e., preference = -1) is applied, providing the same effect as t_1.
+    """
+    def __init__(self, *args, **kwargs):
+        super(TestTariff, self).__init__(*args, **kwargs)
+        self.inf = "./input/tariff.xml"
+        # have to use sql because of recursive container type
+        self.ext = 'sqlite'
+
+    def setUp(self):
+        super(TestTariff, self).setUp()
+
+        # # Find agent ids of source and sink facilities
+        # self.agent_ids = self.agent_entry["AgentId"]
+        # self.agent_impl = self.agent_entry["Spec"]
+        # self.source_id = find_ids(":agents:Source", self.agent_impl, 
+        #                           self.agent_ids)
+        # self.sink_id = find_ids(":agents:Sink", self.agent_impl, self.agent_ids)
+
+    def test_xaction_specific(self):
+        exp_b_to_a = np.array([1, 0, 1, 0])
+        exp_a_to_a = np.ones(4) - exp_b_to_a
+        # # Check that at time step 1, there are 2 transactions with total
+        # # amount of 2
+        # quantity = 0
+        # for t in np.where(self.trans_time == 1)[0]:
+        #     quantity += self.quantities[
+        #         np.where(self.resource_ids == self.trans_resource[t])]
+        # assert_equal(quantity, 2)
+
+        # # Check that at time step 2, there are 3 transactions with total
+        # # amount of 3
+        # quantity = 0
+        # for t in np.where(self.trans_time == 2)[0]:
+        #     quantity += self.quantities[
+        #         np.where(self.resource_ids == self.trans_resource[t])]
+        # assert_equal(quantity, 3)
+
+        # # Check that at time step 3, there are 2 transactions with total
+        # # amount of 2
+        # quantity = 0
+        # for t in np.where(self.trans_time == 3)[0]:
+        #     quantity += self.quantities[
+        #         np.where(self.resource_ids == self.trans_resource[t])]
+        # assert_equal(quantity, 2)
