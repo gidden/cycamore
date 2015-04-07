@@ -23,7 +23,7 @@ double TariffRegion::AdjustMatlPref(Request<Material>* req, Bid<Material>* bid,
     LOG(cyclus::LEV_INFO4, "TariffR") << "Initial pref: " << pref;
     name = other->prototype();
     if (vals.find(name) != vals.end()) {
-      pref += vals[name];
+      pref *= vals[name];
     }
   }
   LOG(cyclus::LEV_INFO4, "TariffR") << "Final pref: " << pref;

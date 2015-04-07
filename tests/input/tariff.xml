@@ -83,12 +83,12 @@
           <key>1</key>
           <val>
             <key>RegionA</key>
-            <val>-1</val>
+            <val>0.5</val>
           </val>
           <key>2</key>
           <val>
             <key>RegionA</key>
-            <val>2</val>
+            <val>1.1</val>
           </val>
           <key>3</key>
           <val>
