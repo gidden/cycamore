@@ -8,23 +8,26 @@ TariffRegion::TariffRegion(cyclus::Context* ctx) : cyclus::Region(ctx) {}
 
 TariffRegion::~TariffRegion() {}
 
+void TariffRegion::Tick() {
+  int time = context()->time();
+  if (tariff_vals.find(time) != tariff_vals.end()) {
+    std::map<std::string, double>& vals = tariff_vals[time];
+    std::map<std::string, double>::iterator it;
+    for (it = vals.begin(); it != vals.end(); ++it) {
+      current_tariffs_[it->first] = it->second;
+    }
+  }
+}
+
 double TariffRegion::AdjustMatlPref(Request<Material>* req, Bid<Material>* bid,
                                     double pref, TradeSense sense) {
-  int time = context()->time();
-  Agent* other;
-  std::string name;
-  LOG(cyclus::LEV_INFO4, "TariffR") << "tariff_vals: " << tariff_vals;
-  LOG(cyclus::LEV_INFO4, "TariffR") << "Initial pref: " << pref;
-  if (tariff_vals.find(time) != tariff_vals.end()) {
-    other = sense == BID ?
-            req->requester()->manager() : bid->bidder()->manager();
-    other = other->parent()->parent(); // region is parent of parent
-    std::map<std::string, double>& vals = tariff_vals[time];
-    LOG(cyclus::LEV_INFO4, "TariffR") << "Initial pref: " << pref;
-    name = other->prototype();
-    if (vals.find(name) != vals.end()) {
-      pref *= vals[name];
-    }
+  Agent* other = sense == BID ?
+                 req->requester()->manager() : bid->bidder()->manager();
+  other = other->parent()->parent(); // region is parent of parent
+  std::string name = other->prototype();
+  if (current_tariffs_.find(name) != current_tariffs_.end()) {
+    LOG(cyclus::LEV_INFO4, "TariffR") << current_tariffs_[name];
+    pref *= current_tariffs_[name];
   }
   LOG(cyclus::LEV_INFO4, "TariffR") << "Final pref: " << pref;
   return pref;

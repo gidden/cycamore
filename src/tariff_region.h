@@ -17,16 +17,23 @@ class TariffRegion : public cyclus::Region {
   #pragma cyclus note {"doc": "A region that applies tarrifs to trades with " \
                               "other regions."}
 
+  virtual void Tick();
+  
   /// adjust preferences for materials based on user input for tariffs
   virtual double AdjustMatlPref(Request<Material>* req, Bid<Material>* bid,
                                 double pref, TradeSense sense);
 
 
- protected:
+ private:
   // todo: add docs, etc.
   // map of region_name: time: value
   #pragma cyclus var {}
   std::map<int, std::map<std::string, double> > tariff_vals;
+
+
+  // this should be internal
+  #pragma cyclus var{}
+  std::map<std::string, double> current_tariffs_;
 };
 
 }  // namespace cyclus
