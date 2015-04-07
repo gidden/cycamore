@@ -8,6 +8,7 @@ import tables
 import uuid
 import sqlite3
 import numpy as np
+import sqlite3
 from numpy.testing import assert_array_almost_equal 
 from numpy.testing import assert_almost_equal 
 from nose.tools import assert_equal, assert_true
@@ -495,39 +496,11 @@ class TestTariff(TestRegression):
         # have to use sql because of recursive container type
         self.ext = 'sqlite'
 
-    def setUp(self):
-        super(TestTariff, self).setUp()
-
-        # # Find agent ids of source and sink facilities
-        # self.agent_ids = self.agent_entry["AgentId"]
-        # self.agent_impl = self.agent_entry["Spec"]
-        # self.source_id = find_ids(":agents:Source", self.agent_impl, 
-        #                           self.agent_ids)
-        # self.sink_id = find_ids(":agents:Sink", self.agent_impl, self.agent_ids)
-
-    def test_xaction_specific(self):
-        exp_b_to_a = np.array([1, 0, 1, 0])
-        exp_a_to_a = np.ones(4) - exp_b_to_a
-        # # Check that at time step 1, there are 2 transactions with total
-        # # amount of 2
-        # quantity = 0
-        # for t in np.where(self.trans_time == 1)[0]:
-        #     quantity += self.quantities[
-        #         np.where(self.resource_ids == self.trans_resource[t])]
-        # assert_equal(quantity, 2)
-
-        # # Check that at time step 2, there are 3 transactions with total
-        # # amount of 3
-        # quantity = 0
-        # for t in np.where(self.trans_time == 2)[0]:
-        #     quantity += self.quantities[
-        #         np.where(self.resource_ids == self.trans_resource[t])]
-        # assert_equal(quantity, 3)
-
-        # # Check that at time step 3, there are 2 transactions with total
-        # # amount of 2
-        # quantity = 0
-        # for t in np.where(self.trans_time == 3)[0]:
-        #     quantity += self.quantities[
-        #         np.where(self.resource_ids == self.trans_resource[t])]
-        # assert_equal(quantity, 2)
+    def test_xaction_commods(self):
+        exp = ['B', 'A', 'B', 'A']
+        conn = sqlite3.connect(self.outf)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT * FROM Transactions')
+        obs = [x['Commodity'] for x in c]
+        assert_equal(obs, exp)
