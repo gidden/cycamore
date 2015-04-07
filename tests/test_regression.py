@@ -495,7 +495,7 @@ class TestTariff(TestRegression):
         self.ext = 'sqlite'
 
     def test_xaction_commods(self):
-        exp = ['B', 'A', 'B', 'A']
+        exp = ['B', 'A', 'B', 'B', 'A']
         conn = sqlite3.connect(self.outf)
         conn.row_factory = sqlite3.Row
         c = conn.cursor()

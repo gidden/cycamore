@@ -2,7 +2,7 @@
 
 <simulation>
   <control>
-    <duration>4</duration>
+    <duration>5</duration>
     <startmonth>1</startmonth>
     <startyear>2000</startyear>
   </control>
@@ -90,7 +90,7 @@
             <key>RegionA</key>
             <val>1.1</val>
           </val>
-          <key>3</key>
+          <key>4</key>
           <val>
             <key>RegionA</key>
             <val>-1</val>
