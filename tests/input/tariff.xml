@@ -52,7 +52,33 @@
 
   <region>
     <name>RegionA</name>
-    <config> <NullRegion/> </config>
+    <config> 
+      <TariffRegion>
+        <!--Prefer RegionB for t=0, then less preference for t=1, more for t=2, none for t=3-->
+        <tariff_vals>
+          <key>0</key>
+          <val>
+            <key>RegionB</key>
+            <val>2</val>
+          </val>
+          <key>1</key>
+          <val>
+            <key>RegionB</key>
+            <val>0.5</val>
+          </val>
+          <key>2</key>
+          <val>
+            <key>RegionB</key>
+            <val>1.1</val>
+          </val>
+          <key>4</key>
+          <val>
+            <key>RegionB</key>
+            <val>-1</val>
+          </val>
+        </tariff_vals>
+      </TariffRegion> 
+    </config>
     <institution>
       <name>InstitutionA</name>
       <initialfacilitylist>
@@ -71,33 +97,7 @@
 
   <region>
     <name>RegionB</name>
-    <config> 
-      <TariffRegion>
-        <!--Prefer RegionA for t=0, then less preference for t=1, more for t=2, none for t=3-->
-        <tariff_vals>
-          <key>0</key>
-          <val>
-            <key>RegionA</key>
-            <val>2</val>
-          </val>
-          <key>1</key>
-          <val>
-            <key>RegionA</key>
-            <val>0.5</val>
-          </val>
-          <key>2</key>
-          <val>
-            <key>RegionA</key>
-            <val>1.1</val>
-          </val>
-          <key>4</key>
-          <val>
-            <key>RegionA</key>
-            <val>-1</val>
-          </val>
-        </tariff_vals>
-      </TariffRegion> 
-    </config>
+    <config> <NullRegion/> </config>
     <institution>
       <name>InstitutionB</name>
       <config> <NullInst/> </config>
