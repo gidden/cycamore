@@ -28,12 +28,10 @@ class TariffRegion : public cyclus::Region {
   // todo: add docs, etc.
   // map of region_name: time: value
   #pragma cyclus var {}
-  std::map<int, std::map<std::string, double> > tariff_vals;
-
-
+  std::map<int, std::map<std::string, double> > region_tariffs;
   // this should be internal
   #pragma cyclus var{}
-  std::map<std::string, double> current_tariffs_;
+  std::map<std::string, double> current_region_tariffs_;
 };
 
 }  // namespace cyclus
