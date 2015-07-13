@@ -196,6 +196,22 @@ class Separations : public cyclus::Facility {
   // custom SnapshotInv and InitInv and EnterNotify are used to persist this
   // state var.
   std::map<std::string, cyclus::toolkit::ResBuf<cyclus::Material> > streambufs;
+
+  #pragma cyclus var { \
+    "doc": "Start and stop times for facility pauses.", \
+    "default": [],     \
+    }
+  std::list< std::pair<int, int> > pauses;
+
+  #pragma cyclus var { \
+    "doc": "DO NOT SET MANUALLY", \
+    "default": -1,                \
+  }
+  int t_unpause_;  
+
+  void Pause();
+  void UnPause();
+  bool Paused();
 };
 
 }  // namespace cycamore

@@ -11,7 +11,9 @@ using cyclus::CompMap;
 
 namespace cycamore {
 
-Separations::Separations(cyclus::Context* ctx) : cyclus::Facility(ctx) {
+Separations::Separations(cyclus::Context* ctx) :
+    cyclus::Facility(ctx),
+    t_unpause_(-1) {
   cyclus::Warn<cyclus::EXPERIMENTAL_WARNING>(
       "the Separations archetype "
       "is experimental");
@@ -70,6 +72,15 @@ void Separations::EnterNotify() {
 }
 
 void Separations::Tick() {
+  if (Paused()) {
+    if (context()->time() >= t_unpause_) {
+      UnPause();
+    } else {
+      return;
+    }
+  }
+
+  
   if (feed.count() == 0) {
     return;
   }
@@ -279,7 +290,23 @@ std::set<cyclus::BidPortfolio<Material>::Ptr> Separations::GetMatlBids(
   return ports;
 }
 
-void Separations::Tock() {}
+void Separations::Pause() {
+  t_unpause_ = pauses.front().first + pauses.front().second;
+  pauses.pop_front();
+  context()->UnregisterTrader(this);
+}
+
+void Separations::UnPause() {
+  t_unpause_ = -1;
+  context()->RegisterTrader(this);
+}
+
+bool Separations::Paused() { return t_unpause_ >= 0; }
+
+void Separations::Tock() {
+  if (!pauses.empty() && context()->time() + 1 == pauses.front().first)
+    Pause();
+}
 
 extern "C" cyclus::Agent* ConstructSeparations(cyclus::Context* ctx) {
   return new Separations(ctx);
