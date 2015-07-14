@@ -137,7 +137,7 @@ class FuelFab : public cyclus::Facility {
     "default": [], \
     "uilabel": "Filler Stream Preferences", \
     "doc": "Filler stream commodity request preferences for each of the given filler commodities (same order)." \
-           " If unspecified, default is to use 1.0 for all preferences.", \
+           " If unspecified, default is to use cyclus::kDefaultPref for all preferences.", \
   }
   std::vector<double> fill_commod_prefs;
   #pragma cyclus var { \
@@ -165,7 +165,7 @@ class FuelFab : public cyclus::Facility {
     "default": [], \
     "uilabel": "Fissile Stream Preferences", \
     "doc": "Fissile stream commodity request preferences for each of the given fissile commodities (same order)." \
-           " If unspecified, default is to use 1.0 for all preferences.", \
+           " If unspecified, default is to use cyclus::kDefaultPref for all preferences.", \
   }
   std::vector<double> fiss_commod_prefs;
   #pragma cyclus var { \
@@ -196,9 +196,10 @@ class FuelFab : public cyclus::Facility {
   #pragma cyclus var { \
     "doc": "Top-up material stream request preference.", \
     "uilabel": "Top-up Stream Preference", \
-    "default": 0, \
+    "default": 0.01, \
   }
-  double topup_pref;
+  double topup_pref; // default must be in range (0, cyclus::kDefaultPref)
+  
   #pragma cyclus var { \
     "doc": "Name of recipe to be used in top-up material stream requests." \
            " This MUST be set if 'topup_size > 0'.", \
