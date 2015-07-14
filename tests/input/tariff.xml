@@ -56,26 +56,42 @@
       <TariffRegion>
         <!--Prefer RegionB for t=0, then less preference for t=1, more for t=2, none for t=3-->
         <region_tariffs>
+          <item>
           <key>0</key>
           <val>
+          <item>
             <key>RegionB</key>
             <val>2</val>
+          </item>
           </val>
+          </item>
+          <item>
           <key>1</key>
           <val>
+          <item>
             <key>RegionB</key>
             <val>0.5</val>
+          </item>
           </val>
+          </item>
+          <item>
           <key>2</key>
           <val>
+          <item>
             <key>RegionB</key>
             <val>1.1</val>
+          </item>
           </val>
+          </item>
+          <item>
           <key>4</key>
           <val>
+            <item>
             <key>RegionB</key>
             <val>-1</val>
+            </item>
           </val>
+          </item>
         </region_tariffs>
       </TariffRegion> 
     </config>
