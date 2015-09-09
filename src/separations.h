@@ -2,6 +2,7 @@
 #define CYCAMORE_SRC_SEPARATIONS_H_
 
 #include "cyclus.h"
+#include "cycamore_version.h"
 
 namespace cycamore {
 
@@ -60,6 +61,8 @@ class Separations : public cyclus::Facility {
  public:
   Separations(cyclus::Context* ctx);
   virtual ~Separations(){};
+
+  virtual std::string version() { return CYCAMORE_VERSION; }
 
   virtual void Tick();
   virtual void Tock();
@@ -140,7 +143,7 @@ class Separations : public cyclus::Facility {
     "doc" : "Maximum quantity of feed material that can be processed per time "\
             "step.", \
     "uilabel": "Maximum Separations Throughput", \
-    "units": "kg", \
+    "units": "kg/(time step)", \
   }
   double throughput;
 
