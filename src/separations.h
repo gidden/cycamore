@@ -198,7 +198,8 @@ class Separations : public cyclus::Facility {
   std::map<std::string, cyclus::toolkit::ResBuf<cyclus::Material> > streambufs;
 
   #pragma cyclus var { \
-    "doc": "Start and stop times for facility pauses.", \
+    "doc": "A container of pausing information. The first element is the starting time " \
+    "of a pause and the second element is the duration of the pause.",  \
     "default": [],     \
     }
   std::list< std::pair<int, int> > pauses;
