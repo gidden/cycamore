@@ -8,6 +8,7 @@ import tables
 import uuid
 import sqlite3
 import numpy as np
+import sqlite3
 from numpy.testing import assert_array_almost_equal 
 from numpy.testing import assert_almost_equal 
 from nose.tools import assert_equal, assert_true
@@ -26,7 +27,7 @@ class TestRegression(TestCase):
         self.ext = '.sqlite'
         self.outf = str(uuid.uuid4()) + self.ext
         self.inf = None
-
+        
     def __del__(self):
         if os.path.isfile(self.outf):
             print("removing {0}".format(self.outf))
@@ -36,6 +37,8 @@ class TestRegression(TestCase):
         if not self.inf:
             raise TypeError(("self.inf must be set in derived classes "
                              "to run regression tests."))
+        self.ext = 'h5' if self.ext is None else self.ext
+        self.outf += '.' + self.ext
         run_cyclus("cyclus", os.getcwd(), self.inf, self.outf)        
 
         # Get specific tables and columns
@@ -476,3 +479,28 @@ class TestRecycle(TestRegression):
         exp[549] = 420.42772559790944
         self.do_compare('reactor', 'repo', 942390000, exp)
 
+class TestTariff(TestRegression):
+    """Tests TariffRegion over a 4-time step simulation.
+
+    RegionA is comprised of a Source and Sink. RegionB is a TariffRegion, and is
+    comprised of a Source. All facilties have a per-timestep capacity of unity.  
+
+    RegionB imposes an "incentive" tariff at t_0, i.e., interregional trade is
+    preferred. At t_1, a normal tariff is applied, making intraregional trade
+    preferred. The incentive is again applied at t_1. Finally cutoff tariff
+    (i.e., preference = -1) is applied, providing the same effect as t_1.
+    """
+    def __init__(self, *args, **kwargs):
+        super(TestTariff, self).__init__(*args, **kwargs)
+        self.inf = "./input/tariff.xml"
+        # have to use sql because of recursive container type
+        self.ext = 'sqlite'
+
+    def test_xaction_commods(self):
+        exp = ['B', 'A', 'B', 'B', 'A']
+        conn = sqlite3.connect(self.outf)
+        conn.row_factory = sqlite3.Row
+        c = conn.cursor()
+        c.execute('SELECT * FROM Transactions')
+        obs = [x['Commodity'] for x in c]
+        assert_equal(obs, exp)
