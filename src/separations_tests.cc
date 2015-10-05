@@ -90,23 +90,23 @@ TEST(SeparationsTests, SepMixElemAndNuclide) {
 
 TEST(SeparationsTests, Retire) {
   std::string config =
-      "<streams>"
-      "    <item>"
-      "        <commod>stream1</commod>"
-      "        <info>"
-      "            <buf_size>-1</buf_size>"
-      "            <efficiencies>"
-      "                <item><comp>U235</comp> <eff>1.0</eff></item>"
-      "            </efficiencies>"
-      "        </info>"
-      "    </item>"
-      "</streams>"
-      ""
-      "<leftover_commod>waste</leftover_commod>"
-      "<throughput>100</throughput>"
-      "<feedbuf_size>100</feedbuf_size>"
-      "<feed_commods> <val>feed</val> </feed_commods>"
-     ;
+            "<streams>"
+            "    <item>"
+            "        <commod>stream1</commod>"
+            "        <info>"
+            "            <buf_size>-1</buf_size>"
+            "            <efficiencies>"
+            "                <item><comp>U235</comp> <eff>1.0</eff></item>"
+            "            </efficiencies>"
+            "        </info>"
+            "    </item>"
+            "</streams>"
+            ""
+            "<leftover_commod>waste</leftover_commod>"
+            "<throughput>100</throughput>"
+            "<feedbuf_size>100</feedbuf_size>"
+            "<feed_commods> <val>feed</val> </feed_commods>"
+      ;
 
   CompMap m;
   m[id("u235")] = 0.1;
@@ -117,7 +117,7 @@ TEST(SeparationsTests, Retire) {
   int life = 2;
 
   cyclus::MockSim sim(cyclus::AgentSpec(":cycamore:Separations"),
-		      config, simdur, life);
+                      config, simdur, life);
   sim.AddSource("feed").recipe("recipe1").Finalize();
   sim.AddSink("stream1").capacity(100).Finalize();
   sim.AddSink("waste").capacity(70).Finalize();
@@ -143,9 +143,77 @@ TEST(SeparationsTests, Retire) {
     tot_mat += m->quantity();
   }
   EXPECT_EQ(100, tot_mat)
-    << "total material traded away does not equal total material separated";
+      << "total material traded away does not equal total material separated";
   EXPECT_EQ(3.0, qr.rows.size())
       << "failed to discharge all material before decomissioning";
- }  
+}
+
+TEST(SeparationsTests, Pause) {
+  std::string config =
+            "<streams>"
+            "    <item>"
+            "        <commod>stream1</commod>"
+            "        <info>"
+            "            <buf_size>-1</buf_size>"
+            "            <efficiencies>"
+            "                <item><comp>U</comp> <eff>0.6</eff></item>"
+            "                <item><comp>Pu239</comp> <eff>.7</eff></item>"
+            "            </efficiencies>"
+            "        </info>"
+            "    </item>"
+            "</streams>"
+            ""
+            "<pauses><val><first>2</first><second>1</second></val></pauses>"
+            ""
+            "<leftover_commod>waste</leftover_commod>"
+            "<throughput>100</throughput>"
+            "<feedbuf_size>100</feedbuf_size>"
+            "<feed_commods> <val>feed</val> </feed_commods>"
+      ;
+
+  CompMap m;
+  m[id("u235")] = 0.08;
+  m[id("u238")] = 0.9;
+  m[id("Pu239")] = .01;
+  m[id("Pu240")] = .01;
+  Composition::Ptr c = Composition::CreateFromMass(m);
+
+  int simdur = 4;
+  cyclus::MockSim sim(cyclus::AgentSpec(":cycamore:Separations"), config, simdur);
+  sim.AddSource("feed").recipe("recipe1").Finalize();
+  sim.AddSink("stream1").capacity(100).Finalize();
+  sim.AddRecipe("recipe1", c);
+  int id = sim.Run();
+
+  std::vector<Cond> conds;
+  conds.push_back(Cond("SenderId", "==", id));
+  int resid;
+
+  conds.push_back(Cond("Time", "==", 1));
+  resid = sim.db().Query("Transactions", &conds).GetVal<int>("ResourceId");
+  MatQuery mq1(sim.GetMaterial(resid));
+  EXPECT_DOUBLE_EQ(m[922350000]*0.6*100, mq1.mass("U235"));
+  EXPECT_DOUBLE_EQ(m[922380000]*0.6*100, mq1.mass("U238"));
+  EXPECT_DOUBLE_EQ(m[942390000]*0.7*100, mq1.mass("Pu239"));
+  EXPECT_DOUBLE_EQ(0, mq1.mass("Pu240"));
+  conds.pop_back();
+
+  conds.push_back(Cond("Time", "==", 2));
+  ASSERT_THROW(sim.db().Query("Transactions", &conds).GetVal<int>("ResourceId"),
+               cyclus::StateError);
+  conds.pop_back();
+
+  conds.push_back(Cond("Time", "==", 3));
+  resid = sim.db().Query("Transactions", &conds).GetVal<int>("ResourceId");
+  MatQuery mq2(sim.GetMaterial(resid));
+  EXPECT_DOUBLE_EQ(m[922350000]*0.6*100, mq2.mass("U235"));
+  EXPECT_DOUBLE_EQ(m[922380000]*0.6*100, mq2.mass("U238"));
+  EXPECT_DOUBLE_EQ(m[942390000]*0.7*100, mq2.mass("Pu239"));
+  EXPECT_DOUBLE_EQ(0, mq2.mass("Pu240"));
+  conds.pop_back();
+
+
+}
+
 } // namespace cycamore
 
