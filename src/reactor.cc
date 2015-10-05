@@ -222,7 +222,7 @@ std::set<cyclus::RequestPortfolio<Material>::Ptr> Reactor::GetMatlRequests() {
     std::vector<Request<Material>*> mreqs;
     for (int j = 0; j < fuel_incommods.size(); j++) {
       std::string commod = fuel_incommods[j];
-      double pref = fuel_prefs[j];
+      double pref = n_assem_order > 1 ? fuel_prefs[j] * .9 : fuel_prefs[j];
       Composition::Ptr recipe = context()->GetRecipe(fuel_inrecipes[j]);
       m = Material::CreateUntracked(assem_size, recipe);
       Request<Material>* r = port->AddRequest(m, this, commod, pref, true);
@@ -264,15 +264,30 @@ void Reactor::AcceptMatlTrades(const std::vector<
     Record("LOAD", ss.str());
   }
 
+  std::map<std::string, std::vector<Material::Ptr > > tmp;
   for (trade = responses.begin(); trade != responses.end(); ++trade) {
     std::string commod = trade->first.request->commodity();
     Material::Ptr m = trade->second;
-    index_res(m, commod);
+    if (tmp.find(commod) == tmp.end()) {
+      tmp[commod] = std::vector<Material::Ptr>();
+    }
+    tmp[commod].push_back(m);
+  }
 
-    if (core.count() < n_assem_core) {
-      core.Push(m);
-    } else {
-      fresh.Push(m);
+  std::map<std::string, std::vector<Material::Ptr > >::const_iterator tmpi;
+  for (tmpi = tmp.begin(); tmpi != tmp.end(); ++tmpi) {
+    std::string commod = tmpi->first;
+    const std::vector<Material::Ptr >& v = tmpi->second;
+    std::vector<Material::Ptr>::const_iterator vit;
+    for (vit = v.begin(); vit != v.end(); ++vit) {
+      Material::Ptr m = *vit;
+      index_res(m, commod);
+      
+      if (core.count() < n_assem_core) {
+        core.Push(m);
+      } else {
+        fresh.Push(m);
+      }  
     }
   }
 }
